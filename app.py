@@ -1,6 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi_sqlalchemy import DBSessionMiddleware, db
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 
 import os
 from dotenv import load_dotenv
@@ -8,13 +10,24 @@ from dotenv import load_dotenv
 load_dotenv('.env')
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory = "static"), name = "static")
 
+
+# @app.get("/")
+# async def root():
+#    return {"message": "hello world"}
 
 @app.get("/")
-async def root():
-   return {"message": "hello world"}
-
-
+def read_root():
+    with open("templates/base.html", 'r') as file:
+        content = file.read()
+    return HTMLResponse(content=content)
+@app.get("/video")
+async def get_video():
+    return FileResponse("static/Video_1.mp4", media_type="video/mp4")
+@app.get("/video")
+async def get_video():
+    return FileResponse("static/Video_2.mp4", media_type="video/mp4")
 
 # To run locally
 if __name__ == '__main__':
