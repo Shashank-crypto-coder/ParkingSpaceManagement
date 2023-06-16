@@ -1,8 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
-from fastapi_sqlalchemy import DBSessionMiddleware, db
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+
 
 import os
 from dotenv import load_dotenv
@@ -22,6 +22,15 @@ def read_root():
     with open("templates/base.html", 'r') as file:
         content = file.read()
     return HTMLResponse(content=content)
+
+# @app.route("/get_value")
+# def get_value():
+#     # Retrieve the value from your Python code
+#     value = counter
+
+#     # Return the value as JSON response
+#     return jsonify(value=value)
+
 @app.get("/video")
 async def get_video():
     return FileResponse("static/Video_1.mp4", media_type="video/mp4")
