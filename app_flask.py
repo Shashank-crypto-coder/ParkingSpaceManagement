@@ -1,50 +1,17 @@
-import uvicorn
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi import Request
-from fastapi.responses import StreamingResponse
+from flask import Flask, render_template,Response
 import cv2
+app=Flask(__name__)
 import pickle
 import cvzone
 import numpy as np
 
-
-import os
-from dotenv import load_dotenv
-
-load_dotenv('.env')
-
-app = FastAPI()
-app.mount("/static", StaticFiles(directory = "static"), name = "static")
-templates = Jinja2Templates(directory="templates")
+import uvicorn
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 
 
-# @app.get("/")
-# async def root():
-#    return {"message": "hello world"}
-
-# @app.get("/")
-# def read_root():
-#     with open("templates/base.html", 'r') as file:
-#         content = file.read()
-#     return HTMLResponse(content=content)
-
-
-# @app.get("/video")
-# async def get_video():
-#     return FileResponse("static/Video_1.mp4", media_type="video/mp4")
-# @app.get("/video")
-# async def get_video():
-#     return FileResponse("static/Video_2.mp4", media_type="video/mp4")
-
-# To run locally
-# if __name__ == '__main__':
-#    uvicorn.run(app, host='0.0.0.0', port=8000)
-
-
-cap = cv2.VideoCapture("static/Video_1.mp4")
+cap = cv2.VideoCapture("E:\DL Workshop\PSM-1\static\Video_1.mp4")
 if (cap.isOpened()== False):
 	print("Error opening video file")
 
@@ -79,8 +46,26 @@ def check(processed_image,img):
         cv2.rectangle(img,pos,(pos[0]+width, pos[1]+height ), color ,2)
         
     tracker_list.append(pos_tracker)
+    # arr = np.ones(k)
+    # for i in pos_tracker:
+    #     arr[i] = 0
+    #print('/'*50)
+    #print(arr)
+    #print(counter)
+    
+    # arr1 = arr.tolist()
+    #arr1 = map(str, arr1)
+    # now = datetime.now()
+    # current_time = now.strftime("%H:%M:%S")
+    # arr1.insert(0,current_time)
+    # df.loc[len(df)] = arr1
+    #df.loc[len(df)-1]["timestamp"] = current_time
+    #print(df.loc[len(df)-1]["timestamp"])
+    #print('*'*50)
+        
     cvzone.putTextRect(img, f'Free : {counter} / {len(position_list)}', (280,310), scale=0.8, thickness=1, offset=20, colorR=(100,100,10))
     return tracker_list,counter
+    
 
 def gen_frames():
     while(cap.isOpened()):
@@ -98,19 +83,45 @@ def gen_frames():
             
         tracker_list,counter = check(dilated_img,img)
         
+        for pos in position_list:
+            cv2.rectangle(img,pos,(pos[0]+width, pos[1]+height ), (255,0,255),2)
+
+        # if ret == True:
+        #     cv2.imshow('Frame', img)
+            #cv2.imshow('Gray_Frame', gray_img)
+            #cv2.imshow('Blur_Frame', blur_img)
+            #cv2.imshow('Threshold_Frame', threshold_img)
+            #cv2.imshow('Median_Blur_Frame', median_img)
+            #cv2.imshow('Dilated_Frame', dilated_img)
+        #     if cv2.waitKey(25) & 0xFF == ord('q'):
+        #         break
+        # if ret == False:
+        #     break
+        #
+        #   cap.set(cv2.CAP_PROP_POS_FRAMES,0)
+        
         ret, buffer = cv2.imencode('.jpg', img)
         frame = buffer.tobytes()
         yield(b'--frame\r\n'
               b'COntent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         
         
-@app.get('/')
-def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-@app.get('/video_feed')
+@app.route('/')
+def index():
+    return render_template('index.html')
+@app.route('/video_feed')
 def video_feed():
-    return StreamingResponse(gen_frames(), media_type='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
 
 if __name__ == '__main__':
    uvicorn.run(app, host='0.0.0.0', port=8000)
+# When everything done, release
+# the video capture object
+
+
+cap.release()
+
+# Closes all the frames
+cv2.destroyAllWindows()

@@ -83,7 +83,13 @@
   <div class="video-container" id="videoContainer"></div>
 
   <h1 id="dynamic-value"> Empty Slots </h1>
-  <script src="static/script.js"></script>
-  
+  <script>
+    var socket = new WebSocket("ws://localhost:8000/ws");
+
+    socket.onmessage = function(event) {
+        var value = event.data;
+        document.getElementById("dynamic-value").textContent = value;
+    };
+    </script>
 </body>
 </html>

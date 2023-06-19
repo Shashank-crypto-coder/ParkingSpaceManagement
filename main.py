@@ -3,7 +3,6 @@ import cv2
 import pickle
 import pandas as pd
 from datetime import datetime
-from flask import Flask, request, jsonify
 
 
 
@@ -60,7 +59,7 @@ def check(processed_image):
         arr[i] = 0
     #print('/'*50)
     #print(arr)
-    #print(counter)
+    print(counter)
     
     arr1 = arr.tolist()
     #arr1 = map(str, arr1)
