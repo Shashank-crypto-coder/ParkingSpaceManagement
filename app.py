@@ -43,18 +43,27 @@ templates = Jinja2Templates(directory="templates")
 # if __name__ == '__main__':
 #    uvicorn.run(app, host='0.0.0.0', port=8000)
 
+def management(video_file,pickle_file):
+    cap = cv2.VideoCapture(video_file)
+    if (cap.isOpened()== False):
+	    print("Error opening video file")
+    with open(pickle_file,'rb') as p:
+        position_list = pickle.load(p)
+    width,height = 33,15
 
-cap = cv2.VideoCapture("static/Video_1.mp4")
-if (cap.isOpened()== False):
-	print("Error opening video file")
+    return gen_frames(cap,position_list,width,height)
+
+# cap = cv2.VideoCapture("static/Video_1.mp4")
+# if (cap.isOpened()== False):
+# 	print("Error opening video file")
 
 
-with open("CarParkingPosition",'rb') as p:
-    position_list = pickle.load(p)
+# with open("CarParkingPosition",'rb') as p:
+#     position_list = pickle.load(p)
 
-width,height = 33,15
+# width,height = 33,15
 
-def check(processed_image,img):
+def check(processed_image,img,position_list,width,height):
     counter = 0
     tracker_list=[]
     pos_tracker=[]
@@ -82,7 +91,7 @@ def check(processed_image,img):
     cvzone.putTextRect(img, f'Free : {counter} / {len(position_list)}', (280,310), scale=0.8, thickness=1, offset=20, colorR=(100,100,10))
     return tracker_list,counter
 
-def gen_frames():
+def gen_frames(cap,position_list,width,height):
     while(cap.isOpened()):
         if cap.get(cv2.CAP_PROP_POS_FRAMES) == cap.get(cv2.CAP_PROP_FRAME_COUNT):
             cap.set(cv2.CAP_PROP_POS_FRAMES,0)
@@ -96,7 +105,7 @@ def gen_frames():
 
         dilated_img = cv2.dilate(median_img, kernel , iterations=1)
             
-        tracker_list,counter = check(dilated_img,img)
+        tracker_list,counter = check(dilated_img,img,position_list,width,height)
         
         ret, buffer = cv2.imencode('.jpg', img)
         frame = buffer.tobytes()
@@ -108,9 +117,13 @@ def gen_frames():
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get('/video_feed')
-def video_feed():
-    return StreamingResponse(gen_frames(), media_type='multipart/x-mixed-replace; boundary=frame')
+@app.get('/video_feed_1')
+def video_feed_1():
+    return StreamingResponse(management("static/Video_1.mp4","CarParkingPosition"), media_type='multipart/x-mixed-replace; boundary=frame')
+
+@app.get('/video_feed_2')
+def video_feed_2():
+    return StreamingResponse(management("static/Video_1.mp4","CarParkingPosition"), media_type='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
    uvicorn.run(app, host='0.0.0.0', port=8000)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Parking Management System</title>
 </head>
 <body>
     <div class="container">
@@ -12,7 +12,8 @@
                 <h3 class="mt-5">Live Streaming</h3>
                 
                 <div class="mall-buttons">
-                    <button class="mall-button" onclick="show()" id="btnID">Shopping Mall 1</button>
+                    <button class="mall-button" onclick="show_level_1()" id="btnID">Level 1</button>
+                    <button class="mall-button" onclick="show_level_2()" id="btnID">Level 2</button>
                 </div>    
 
                 <img id="image" src="" />
@@ -22,14 +23,22 @@
 </body>
 
 <script>
-        // <img src="{{ url_for('video_feed')}}" width="50%">
+        // <img src="{{ url_for('video_feed_1')}}" width="50%">
 
-        function show() {
+        function show_level_1() {
             let image = document.getElementById("image");
             image.src =
-            "{{ url_for('video_feed')}}"
-            document.getElementById("btnID")
-                .style.display = "none";
+            "{{ url_for('video_feed_1')}}"
+            // document.getElementById("btnID")
+            //     .style.display = "none";
+        }
+
+        function show_level_2() {
+            let image = document.getElementById("image");
+            image.src =
+            "{{ url_for('video_feed_2')}}"
+            // document.getElementById("btnID")
+            //     .style.display = "none";
         }
     
 </script>
